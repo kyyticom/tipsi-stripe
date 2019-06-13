@@ -207,6 +207,37 @@ RCT_EXPORT_METHOD(createTokenWithCard:(NSDictionary *)params
     }];
 }
 
+RCT_EXPORT_METHOD(createPaymentMethodWithCard:(NSDictionary *)params
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject) {
+    if(!requestIsCompleted) {
+        NSDictionary *error = [errorCodes valueForKey:kErrorKeyBusy];
+        reject(error[kErrorKeyCode], error[kErrorKeyDescription], nil);
+        return;
+    }
+    
+    requestIsCompleted = NO;
+    promiseResolver = resolve;
+    promiseRejector = reject;
+    
+    STPAPIClient *stripeAPIClient = [self newAPIClient];
+    
+    STPCardParams *cardParams = [self createCard:params];
+    
+    [stripeAPIClient createTokenWithCard:cardParams completion:^(STPToken *token, NSError *error) {
+        requestIsCompleted = YES;
+        
+        if (error) {
+            NSDictionary *jsError = [errorCodes valueForKey:kErrorKeyApi];
+            [self rejectPromiseWithCode:jsError[kErrorKeyCode] message:error.localizedDescription];
+        } else {
+            resolve([self convertPaymentMethodObject:token]);
+        }
+    }];
+}
+
+createToken
+
 RCT_EXPORT_METHOD(createTokenWithBankAccount:(NSDictionary *)params
                     resolver:(RCTPromiseResolveBlock)resolve
                     rejecter:(RCTPromiseRejectBlock)reject) {
@@ -629,6 +660,14 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
 
 - (STPAPIClient *)newAPIClient {
     return [[STPAPIClient alloc] initWithPublishableKey:[Stripe defaultPublishableKey]];
+}
+
+- (NSDictionary *)convertPaymentMethodObject:(STPToken*)token {
+    STPPaymentMethodCardParams *pmCardParams = [STPPaymentMethodCardParams new]
+    
+    pmCardParams.token = token.tokenId
+    
+    return pmCardParams
 }
 
 - (NSDictionary *)convertTokenObject:(STPToken*)token {

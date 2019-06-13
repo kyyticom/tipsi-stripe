@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		08BF38B122B2741F007D1F7A /* Stripe.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 08BF38B022B2741F007D1F7A /* Stripe.framework */; };
 		3A1FF6F81DC3857F00A43A04 /* TPSStripeManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A1FF6F71DC3857F00A43A04 /* TPSStripeManager.m */; };
 		3A228EB21DC52E54007BB9D0 /* PassKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3A228EB11DC52E54007BB9D0 /* PassKit.framework */; };
 		3A4EF3251DC8F90100A7C0BD /* TPSCardFieldManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 3A4EF3241DC8F90100A7C0BD /* TPSCardFieldManager.m */; };
@@ -28,6 +29,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		08BF38B022B2741F007D1F7A /* Stripe.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Stripe.framework; sourceTree = "<group>"; };
+		08BF38B222B2743C007D1F7A /* Stripe.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; name = Stripe.bundle; path = Stripe.framework/Stripe.bundle; sourceTree = "<group>"; };
 		3A1FF6F61DC3857F00A43A04 /* TPSStripeManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TPSStripeManager.h; sourceTree = "<group>"; };
 		3A1FF6F71DC3857F00A43A04 /* TPSStripeManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TPSStripeManager.m; sourceTree = "<group>"; };
 		3A228EB11DC52E54007BB9D0 /* PassKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PassKit.framework; path = System/Library/Frameworks/PassKit.framework; sourceTree = SDKROOT; };
@@ -48,6 +51,7 @@
 			files = (
 				3C0CB3831E6D765D00CF5D16 /* Stripe.framework in Frameworks */,
 				3A228EB21DC52E54007BB9D0 /* PassKit.framework in Frameworks */,
+				08BF38B122B2741F007D1F7A /* Stripe.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -57,7 +61,9 @@
 		3A228EB01DC52E54007BB9D0 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				08BF38B222B2743C007D1F7A /* Stripe.bundle */,
 				3C0CB3821E6D765D00CF5D16 /* Stripe.framework */,
+				08BF38B022B2741F007D1F7A /* Stripe.framework */,
 				3A228EB11DC52E54007BB9D0 /* PassKit.framework */,
 			);
 			name = Frameworks;
@@ -135,6 +141,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = 3A3A7F111DC27B520030F9DC;
@@ -268,6 +275,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"${BUILT_PRODUCTS_DIR}/**",
 					"$BUILD_DIR/$CONFIGURATION$EFFECTIVE_PLATFORM_NAME/Stripe/**",
+					"$(PROJECT_DIR)",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -281,6 +289,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"${BUILT_PRODUCTS_DIR}/**",
 					"$BUILD_DIR/$CONFIGURATION$EFFECTIVE_PLATFORM_NAME/Stripe/**",
+					"$(PROJECT_DIR)",
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";

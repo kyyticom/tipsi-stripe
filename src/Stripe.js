@@ -170,6 +170,14 @@ class Stripe {
     )
     return StripeModule.createSourceWithParams(params)
   }
+  createPaymentMethodWithCard = (params = {}) => {
+    checkInit(this)
+    checkArgs(
+      types.createTokenWithCardParamsPropTypes,
+      params, 'params', 'Stripe.createTokenWithCard'
+    )
+    return StripeModule.createPaymentMethodWithCard(params)
+  }
 }
 
 export default new Stripe()
