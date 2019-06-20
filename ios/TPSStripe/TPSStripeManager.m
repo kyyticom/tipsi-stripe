@@ -222,21 +222,55 @@ RCT_EXPORT_METHOD(createPaymentMethodWithCard:(NSDictionary *)params
     
     STPAPIClient *stripeAPIClient = [self newAPIClient];
     
-    STPCardParams *cardParams = [self createCard:params];
+    STPPaymentMethodCardParams *cardParams = [self createPaymentMethodCardParams:params];
+
+    STPPaymentMethodBillingDetails *billingDetails = [self createPaymentMethodBillingDetails:params];
+
+    STPPaymentMethodParams *paymentMethodParams = [STPPaymentMethodParams paramsWithCard:cardParams billingDetails:billingDetails metadata:nil];
     
-    [stripeAPIClient createTokenWithCard:cardParams completion:^(STPToken *token, NSError *error) {
+    [stripeAPIClient createPaymentMethodWithParams:paymentMethodParams completion:^(STPPaymentMethod *paymentMethod, NSError *error) {
         requestIsCompleted = YES;
         
         if (error) {
             NSDictionary *jsError = [errorCodes valueForKey:kErrorKeyApi];
             [self rejectPromiseWithCode:jsError[kErrorKeyCode] message:error.localizedDescription];
         } else {
-            resolve([self convertPaymentMethodObject:token]);
+            resolve([self convertPMObject:paymentMethod]);
         }
     }];
 }
 
-createToken
+RCT_EXPORT_METHOD(convertApplePayTokenToPaymentMethod:(NSString*)tokenId
+                    resolver:(RCTPromiseResolveBlock)resolve
+                    rejecter:(RCTPromiseRejectBlock)reject) {
+    if(!requestIsCompleted) {
+        NSDictionary *error = [errorCodes valueForKey:kErrorKeyBusy];
+        reject(error[kErrorKeyCode], error[kErrorKeyDescription], nil);
+        return;
+    }
+
+    requestIsCompleted = NO;
+    promiseResolver = resolve;
+    promiseRejector = reject;
+
+    STPAPIClient *stripeAPIClient = [self newAPIClient];
+
+    STPPaymentMethodCardParams *cardParams = [STPPaymentMethodCardParams new];
+    cardParams.token = tokenId;
+
+    STPPaymentMethodParams *paymentMethodParams = [STPPaymentMethodParams paramsWithCard:cardParams billingDetails:nil metadata:nil];
+
+    [stripeAPIClient createPaymentMethodWithParams:paymentMethodParams completion:^(STPPaymentMethod *paymentMethod, NSError *error) {
+        requestIsCompleted = YES;
+        
+        if (error) {
+            NSDictionary *jsError = [errorCodes valueForKey:kErrorKeyApi];
+            [self rejectPromiseWithCode:jsError[kErrorKeyCode] message:error.localizedDescription];
+        } else {
+            resolve([self convertPMObject:paymentMethod]);
+        }
+    }];
+}
 
 RCT_EXPORT_METHOD(createTokenWithBankAccount:(NSDictionary *)params
                     resolver:(RCTPromiseResolveBlock)resolve
@@ -515,6 +549,30 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
     return cardParams;
 }
 
+- (STPPaymentMethodCardParams *)createPaymentMethodCardParams:(NSDictionary*)params {
+    STPPaymentMethodCardParams *pmCardParams = [STPPaymentMethodCardParams new];
+    
+    pmCardParams.number = params[@"number"];
+    pmCardParams.expMonth = params[@"expMonth"];
+    pmCardParams.expYear = params[@"expYear"];
+    pmCardParams.cvc = params[@"cvc"];
+
+    return pmCardParams;
+}
+
+- (STPPaymentMethodBillingDetails *)createPaymentMethodBillingDetails:(NSDictionary*)params{
+    STPPaymentMethodBillingDetails *pmBillingDetails = [STPPaymentMethodBillingDetails new];
+
+    pmBillingDetails.name = params[@"name"];
+    pmBillingDetails.address.line1 = params[@"addressLine1"];
+    pmBillingDetails.address.line2 = params[@"addressLine2"];
+    pmBillingDetails.address.city = params[@"addressCity"];
+    pmBillingDetails.address.state = params[@"addressState"];
+    pmBillingDetails.address.country = params[@"addressCountry"];
+
+    return pmBillingDetails;
+}
+
 - (void)resolvePromise:(id)result {
     if (promiseResolver) {
         promiseResolver(result);
@@ -662,13 +720,13 @@ RCT_EXPORT_METHOD(openApplePaySetup) {
     return [[STPAPIClient alloc] initWithPublishableKey:[Stripe defaultPublishableKey]];
 }
 
-- (NSDictionary *)convertPaymentMethodObject:(STPToken*)token {
-    STPPaymentMethodCardParams *pmCardParams = [STPPaymentMethodCardParams new]
-    
-    pmCardParams.token = token.tokenId
-    
-    return pmCardParams
-}
+ - (NSDictionary *)convertPMObject:(STPPaymentMethod*)paymentMethod {
+     NSMutableDictionary *result = [@{} mutableCopy];
+
+    [result setValue:paymentMethod.stripeId forKey:@"paymentMethodId"];
+
+     return result;
+ }
 
 - (NSDictionary *)convertTokenObject:(STPToken*)token {
     NSMutableDictionary *result = [@{} mutableCopy];

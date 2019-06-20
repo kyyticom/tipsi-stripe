@@ -23,13 +23,18 @@ import com.google.android.gms.wallet.WalletConstants;
 import com.stripe.android.SourceCallback;
 import com.stripe.android.Stripe;
 import com.stripe.android.TokenCallback;
+import com.stripe.android.ApiResultCallback;
 import com.stripe.android.model.Source;
 import com.stripe.android.model.SourceParams;
 import com.stripe.android.model.Token;
+import com.stripe.android.model.PaymentMethodCreateParams;
+import com.stripe.android.model.PaymentMethod;
+import com.stripe.android.model.Card;
 
 import static com.gettipsi.stripe.Errors.*;
 import static com.gettipsi.stripe.util.Converters.convertSourceToWritableMap;
 import static com.gettipsi.stripe.util.Converters.convertTokenToWritableMap;
+import static com.gettipsi.stripe.util.Converters.convertPaymentMethodToWritableMap;
 import static com.gettipsi.stripe.util.Converters.createBankAccount;
 import static com.gettipsi.stripe.util.Converters.createCard;
 import static com.gettipsi.stripe.util.Converters.getStringOrNull;
@@ -161,6 +166,62 @@ public class StripeModule extends ReactContextBaseJavaModule {
             promise.reject(toErrorCode(error), error.getMessage());
           }
         });
+    } catch (Exception e) {
+      promise.reject(toErrorCode(e), e.getMessage());
+    }
+  }
+
+  @ReactMethod
+  public void createPaymentMethodWithCard(final ReadableMap cardData, final Promise promise) {
+    try {
+      ArgCheck.nonNull(mStripe);
+      ArgCheck.notEmptyString(mPublicKey);
+
+      Card card = createCard(cardData);
+
+      PaymentMethodCreateParams.Card paymentMethodCreateParamsCard = card.toPaymentMethodParamsCard();
+      PaymentMethodCreateParams paymentMethodCreateParams = PaymentMethodCreateParams.create(paymentMethodCreateParamsCard, null);
+      mStripe.createPaymentMethod(
+        paymentMethodCreateParams,
+        new ApiResultCallback<PaymentMethod>() {
+          public void onSuccess(PaymentMethod paymentMethod) {
+            promise.resolve(convertPaymentMethodToWritableMap(paymentMethod));
+          }
+          public void onError(Exception error) {
+            error.printStackTrace();
+            promise.reject(toErrorCode(error), error.getMessage());
+          }
+        },
+          mPublicKey,
+          null
+        );
+    } catch (Exception e) {
+      promise.reject(toErrorCode(e), e.getMessage());
+    }
+  }
+
+  @ReactMethod
+  public void convertAndroidPayTokenToPaymentMethod(final String tokenId, final Promise promise) {
+    try {
+      ArgCheck.nonNull(mStripe);
+      ArgCheck.nonNull(mPublicKey);
+
+      PaymentMethodCreateParams.Card paymentMethodCreateParamsCard = PaymentMethodCreateParams.Card.create(tokenId);
+      PaymentMethodCreateParams paymentMethodCreateParams = PaymentMethodCreateParams.create(paymentMethodCreateParamsCard, null);
+      mStripe.createPaymentMethod(
+        paymentMethodCreateParams,
+        new ApiResultCallback<PaymentMethod>() {
+          public void onSuccess(PaymentMethod paymentMethod) {
+            promise.resolve(convertPaymentMethodToWritableMap(paymentMethod));
+          }
+          public void onError(Exception error) {
+            error.printStackTrace();
+            promise.reject(toErrorCode(error), error.getMessage());
+          }
+        },
+          mPublicKey,
+          null
+        );
     } catch (Exception e) {
       promise.reject(toErrorCode(e), e.getMessage());
     }

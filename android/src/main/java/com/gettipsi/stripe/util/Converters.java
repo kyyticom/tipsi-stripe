@@ -22,6 +22,7 @@ import com.stripe.android.model.SourceOwner;
 import com.stripe.android.model.SourceReceiver;
 import com.stripe.android.model.SourceRedirect;
 import com.stripe.android.model.Token;
+import com.stripe.android.model.PaymentMethod;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -51,6 +52,16 @@ public class Converters {
     }
 
     return newToken;
+  }
+
+  public static WritableMap convertPaymentMethodToWritableMap(PaymentMethod paymentMethod) {
+    WritableMap newPaymentMethod = Arguments.createMap();
+
+    if (paymentMethod == null) return newPaymentMethod;
+
+    newPaymentMethod.putString("paymentMethodId", paymentMethod.id);
+
+    return newPaymentMethod;
   }
 
   public static WritableMap putExtraToTokenMap(final WritableMap tokenMap, UserAddress billingAddress, UserAddress shippingAddress, String emailAddress) {
@@ -179,28 +190,29 @@ public class Converters {
   }
 
   public static Card createCard(final ReadableMap cardData) {
-    return new Card(
+    final Card card = Card.create(
       // required fields
       cardData.getString("number"),
       cardData.getInt("expMonth"),
       cardData.getInt("expYear"),
       // additional fields
-      getValue(cardData, "cvc"),
-      getValue(cardData, "name"),
-      getValue(cardData, "addressLine1"),
-      getValue(cardData, "addressLine2"),
-      getValue(cardData, "addressCity"),
-      getValue(cardData, "addressState"),
-      getValue(cardData, "addressZip"),
-      getValue(cardData, "addressCountry"),
-      getValue(cardData, "brand"),
-      getValue(cardData, "last4"),
-      getValue(cardData, "fingerprint"),
-      getValue(cardData, "funding"),
-      getValue(cardData, "country"),
-      getValue(cardData, "currency"),
-      getValue(cardData, "id")
+      getValue(cardData, "cvc")
+      // getValue(cardData, "name"),
+      // getValue(cardData, "addressLine1"),
+      // getValue(cardData, "addressLine2"),
+      // getValue(cardData, "addressCity"),
+      // getValue(cardData, "addressState"),
+      // getValue(cardData, "addressZip"),
+      // getValue(cardData, "addressCountry"),
+      // getValue(cardData, "brand"),
+      // getValue(cardData, "last4"),
+      // getValue(cardData, "fingerprint"),
+      // getValue(cardData, "funding"),
+      // getValue(cardData, "country"),
+      // getValue(cardData, "currency"),
+      // getValue(cardData, "id")
     );
+    return card;
   }
 
 
@@ -397,8 +409,8 @@ public class Converters {
       accountData.getString("currency"),
       getValue(accountData, "routingNumber", "")
     );
-    account.setAccountHolderName(getValue(accountData, "accountHolderName"));
-    account.setAccountHolderType(getValue(accountData, "accountHolderType"));
+    // account.setAccountHolderName(getValue(accountData, "accountHolderName"));
+    // account.setAccountHolderType(getValue(accountData, "accountHolderType"));
 
     return account;
   }
@@ -420,5 +432,4 @@ public class Converters {
 
     return null;
   }
-
 }
